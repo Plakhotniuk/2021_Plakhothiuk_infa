@@ -41,6 +41,8 @@ draw_circle(color_white, moon_coord, moon_radius, 0)
 def draw_ellipse(surface, color, coord_rect, wid):
     pygame.draw.ellipse(surface=surface, color=color, rect=coord_rect, width=wid)
 
+
+
 # Draw Clouds
 dark_cloud_size = (400, 70)
 light_cloud_size = (500, 90)
@@ -60,12 +62,31 @@ for i in range(number_of_dark_clouds):
     draw_ellipse(screen, color_dark_grew_cloud, rect_cloud, 0)
     i += 1
 
-# Draw SpaceShip
-spaceship_board_coord_and_size = (5, 290, 300, 90)
+# SPACESHIP
+
+# Spaceshiplight
+Spaceship_position = (150, 300)
+Spaceship_surface = pygame.surface.Surface(screen.get_size())
+pygame.draw.polygon(Spaceship_surface, color_white, [(Spaceship_position[0] - 100, Spaceship_position[1] + 300),
+                                                     Spaceship_position,
+                                                     (Spaceship_position[0] + 100, Spaceship_position[1] + 300)])
+Spaceship_surface.set_alpha(150)
+screen.blit(Spaceship_surface, (0, 0))
+
+# Draw Spaceship Board and Cabin
+spaceship_board_coord_and_size = (Spaceship_position[0] - 145, Spaceship_position[1] - 10, 300, 90)
 draw_ellipse(screen, color_spaceship2, spaceship_board_coord_and_size, 0)
 
-spaceship_Cabin_coord_and_size = (50, 280, 200, 70)
+spaceship_Cabin_coord_and_size = (Spaceship_position[0] - 100, Spaceship_position[1] - 20, 200, 70)
 draw_ellipse(screen, color_spaceship1, spaceship_Cabin_coord_and_size, 0)
+
+# SpaceshipWindows
+draw_ellipse(screen, color_white, (Spaceship_position[0] - 130, Spaceship_position[1] + 30, 35, 12), 0)
+draw_ellipse(screen, color_white, (Spaceship_position[0] - 90, Spaceship_position[1] + 50, 35, 12), 0)
+draw_ellipse(screen, color_white, (Spaceship_position[0] - 40, Spaceship_position[1] + 60, 35, 12), 0)
+draw_ellipse(screen, color_white, (Spaceship_position[0] + 95, Spaceship_position[1] + 30, 35, 12), 0)
+draw_ellipse(screen, color_white, (Spaceship_position[0] + 65, Spaceship_position[1] + 50, 35, 12), 0)
+draw_ellipse(screen, color_white, (Spaceship_position[0] + 20, Spaceship_position[1] + 60, 35, 12), 0)
 
 pygame.display.update()
 clock = pygame.time.Clock()
