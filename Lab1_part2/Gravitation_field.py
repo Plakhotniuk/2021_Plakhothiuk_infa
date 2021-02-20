@@ -4,7 +4,7 @@ t.shape('circle')
 t.color('blue')
 t.width(1)
 t.speed(10)
-Vx = 15
+Vx = 13
 Vy = 40
 dt = 0.1
 ay = -10
