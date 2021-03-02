@@ -157,10 +157,10 @@ while not finished:
             elif elem['code'] == 2:
                 elem['x'] += elem['velocity_x']
                 elem['y'] += elem['velocity_y']
-                if elem['x'] >= screensize[0] // 2 and elem['x'] <= screensize[0] // 2 + 10:
+                if elem['x'] >= screensize[0] // 2 and elem['x'] <= screensize[0] // 2 + 3:
                     elem['velocity_y'] = randint(-5, 5)
                     elem['velocity_x'] = randint(-5, 5)
-                if elem['y'] >= screensize[0] // 2 and elem['y'] <= screensize[1] // 2 + 10:
+                if elem['y'] >= screensize[1] // 2 and elem['y'] <= screensize[1] // 2 + 3:
                     elem['velocity_y'] = randint(-5, 5)
                     elem['velocity_x'] = randint(-5, 5)
                 if elem['x'] >= screensize[0] - elem['radius']//2:
