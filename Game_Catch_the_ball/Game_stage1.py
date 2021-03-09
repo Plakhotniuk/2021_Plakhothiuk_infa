@@ -1,8 +1,6 @@
 import pygame
-import os
 from random import randint
-import numpy as np
-import re
+
 
 
 pygame.init()
@@ -20,6 +18,9 @@ CYAN = (0, 255, 255)
 BLACK = (0, 0, 0)
 COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
 
+score = {'score': 0, 'color': COLORS[randint(0, 5)], 'Username': '', 'Complexity': ''}
+
+complexity_coef = 1
 
 def new_ball():
     """
@@ -27,12 +28,12 @@ def new_ball():
     :return: возвращает кружок с его рандомными параметрами
     """
     ball_code = 1
-    ball_radius = randint(30, 50)
+    ball_radius = randint(30, 50) // complexity_coef
     ball_color = COLORS[randint(0, 5)]
     ball_coord_x = randint(ball_radius, screensize[0] - ball_radius)
     ball_coord_y = randint(ball_radius, screensize[1] - ball_radius)
-    ball_velocity_x = randint(-5, 5)
-    ball_velocity_y = randint(-5, 5)
+    ball_velocity_x = int(randint(-5, 5) * complexity_coef)
+    ball_velocity_y = int(randint(-5, 5) * complexity_coef)
     ball_element = {"code": ball_code, "color": ball_color, "radius": ball_radius, "x": ball_coord_x,
                     "y": ball_coord_y, "velocity_x": ball_velocity_x, "velocity_y": ball_velocity_y}
     return ball_element
@@ -44,12 +45,12 @@ def new_square():
     :return: возвращает квадратик с его рандомными параметрами
     """
     square_code = 2
-    square_side = randint(30, 50)
+    square_side = randint(30, 50) // complexity_coef
     square_color = COLORS[randint(0, 5)]
     square_coord_x = randint(square_side // 2, screensize[0] - square_side // 2)
     square_coord_y = randint(square_side // 2, screensize[1] - square_side // 2)
-    square_velocity_x = randint(-5, 5)
-    square_velocity_y = randint(-5, 5)
+    square_velocity_x = (randint(-5, 5) * complexity_coef)
+    square_velocity_y = (randint(-5, 5) * complexity_coef)
     square_element = {"code": square_code, "color": square_color, "radius": square_side, "x": square_coord_x,
                       "y": square_coord_y, "velocity_x": square_velocity_x, "velocity_y": square_velocity_y}
     return square_element
@@ -99,8 +100,9 @@ clock = pygame.time.Clock()
 
 finished = False
 enter_name = False
+choose_complexity = False
 
-score = {'score': 0, 'color': COLORS[randint(0, 5)], 'Username': ''}
+
 
 while not finished:
     clock.tick(FPS)
@@ -110,22 +112,46 @@ while not finished:
                 finished = True
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
-                    score['Username'].rstrip
+                    score['Username'] = score['Username'].replace("\n", "")
                     enter_name = True
                 if event.key == pygame.K_BACKSPACE:
                     score['Username'] = score['Username'][:-1]
-                else:
+                elif event.key != pygame.K_BACKSPACE and event.key != pygame.K_RETURN:
                     score['Username'] += event.unicode
 
         start_screen = pygame.font.SysFont('Times New Roman', 40)
-        start_text = start_screen.render("Write your name to start the game: " + score['Username'], True,
+        start_text = start_screen.render(("Write your name to start the game: " + score['Username']), True,
                                          score['color'])
-        screen.blit(start_text, (screensize[0] // 4, screensize[1] // 3))
+        screen.blit(start_text, (screensize[0] // 5, screensize[1] // 4))
         pygame.display.flip()
-    else:
-        myfont = pygame.font.SysFont('Times New Roman', 40)
-        scoretext = myfont.render((score['Username'] + "'s score = " + str(score['score'])), True, score['color'])
-        screen.blit(scoretext, (screensize[0] // 2, 30))
+
+    elif enter_name == True and choose_complexity == False:
+        start_screen = pygame.font.SysFont('Times New Roman', 30)
+        start_text = start_screen.render("Choose complexity :-) 1 - Normal 2 - Hard  3 - Impossible", True,
+                                         score['color'])
+        screen.blit(start_text, (screensize[0] // 8, screensize[1] // 4))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                finished = True
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_1:
+                    complexity_coef = 1
+                    score['Complexity'] = 'Normal'
+                    choose_complexity = True
+                elif event.key == pygame.K_2:
+                    complexity_coef = 1.5
+                    score['Complexity'] = 'Hard'
+                    choose_complexity = True
+                elif event.key == pygame.K_3:
+                    complexity_coef = 3
+                    score['Complexity'] = 'Impossible'
+                    choose_complexity = True
+        pygame.display.flip()
+
+    elif enter_name == True and choose_complexity == True:
+        myfont = pygame.font.SysFont('Times New Roman', 30)
+        scoretext = myfont.render(("Chosen complexity: " + score['Complexity'] + "   |   " + score['Username'] + "'s score = " + str(score['score'])), True, score['color'])
+        screen.blit(scoretext, (screensize[0] // 8, 30))
         for event in pygame.event.get():
 
             if event.type == pygame.QUIT:
