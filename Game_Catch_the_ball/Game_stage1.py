@@ -1,7 +1,7 @@
 import pygame
 from random import randint
-
-
+import os
+import json
 
 pygame.init()
 
@@ -21,6 +21,7 @@ COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
 score = {'score': 0, 'color': COLORS[randint(0, 5)], 'Username': '', 'Complexity': ''}
 
 complexity_coef = 1
+
 
 def new_ball():
     """
@@ -103,10 +104,9 @@ enter_name = False
 choose_complexity = False
 
 
-
 while not finished:
     clock.tick(FPS)
-    if enter_name == False:
+    if not enter_name:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 finished = True
@@ -127,7 +127,7 @@ while not finished:
 
     elif enter_name == True and choose_complexity == False:
         start_screen = pygame.font.SysFont('Times New Roman', 30)
-        start_text = start_screen.render("Choose complexity :-) 1 - Normal 2 - Hard  3 - Impossible", True,
+        start_text = start_screen.render("Choose complexity: 1 - Normal 2 - Hard  3 - Impossible", True,
                                          score['color'])
         screen.blit(start_text, (screensize[0] // 8, screensize[1] // 4))
         for event in pygame.event.get():
@@ -135,22 +135,24 @@ while not finished:
                 finished = True
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_1:
-                    complexity_coef = 1
+                    complexity_coef += 1
                     score['Complexity'] = 'Normal'
                     choose_complexity = True
                 elif event.key == pygame.K_2:
-                    complexity_coef = 1.5
+                    complexity_coef += 1.5
                     score['Complexity'] = 'Hard'
                     choose_complexity = True
                 elif event.key == pygame.K_3:
-                    complexity_coef = 3
+                    complexity_coef += 3
                     score['Complexity'] = 'Impossible'
                     choose_complexity = True
         pygame.display.flip()
 
     elif enter_name == True and choose_complexity == True:
         myfont = pygame.font.SysFont('Times New Roman', 30)
-        scoretext = myfont.render(("Chosen complexity: " + score['Complexity'] + "   |   " + score['Username'] + "'s score = " + str(score['score'])), True, score['color'])
+        scoretext = myfont.render(("Chosen complexity: " + score['Complexity'] +
+                                   "   |   " + score['Username'] + "'s score = " +
+                                   str(score['score'])), True, score['color'])
         screen.blit(scoretext, (screensize[0] // 8, 30))
         for event in pygame.event.get():
 
@@ -174,8 +176,8 @@ while not finished:
                                 score['score'] += 1
                                 score['color'] = elem['color']
                         elif elem['code'] == 2:
-                            if abs(elem['x'] - x0) <= elem['radius'] // 2 and abs(elem['y'] - y0) <= elem[
-                                'radius'] // 2:
+                            if abs(elem['x'] - x0) <= elem['radius'] // 2 and \
+                                    abs(elem['y'] - y0) <= elem['radius'] // 2:
                                 if randint(1, 2) == 1:
                                     element_mass[i] = new_ball()
                                 else:
@@ -215,10 +217,10 @@ while not finished:
                 elif elem['code'] == 2:
                     elem['x'] += elem['velocity_x']
                     elem['y'] += elem['velocity_y']
-                    if elem['x'] >= screensize[0] // 2 and elem['x'] <= screensize[0] // 2 + 3:
+                    if screensize[0] // 2 <= elem['x'] <= screensize[0] // 2 + 3:
                         elem['velocity_y'] = randint(-5, 5)
                         elem['velocity_x'] = randint(-5, 5)
-                    if elem['y'] >= screensize[1] // 2 and elem['y'] <= screensize[1] // 2 + 3:
+                    if screensize[1] // 2 <= elem['y'] <= screensize[1] // 2 + 3:
                         elem['velocity_y'] = randint(-5, 5)
                         elem['velocity_x'] = randint(-5, 5)
                     if elem['x'] >= screensize[0] - elem['radius'] // 2:
@@ -243,3 +245,17 @@ while not finished:
     screen.fill(BLACK)
 
 pygame.quit()
+
+
+def leaders():
+    """
+    :return: Добавление результатов игровой сессии в файл
+    """
+
+    print('Your result: ' + '\n' + score['Username'] + ' ' + score['Complexity'] + ' ' + str(score['score']))
+    filename = 'Data'
+    with open(filename, 'a+') as file:
+        file.write(score['Username'] + ' ' + score['Complexity'] + ' ' + str(score['score']) + '\n')
+
+
+leaders()
