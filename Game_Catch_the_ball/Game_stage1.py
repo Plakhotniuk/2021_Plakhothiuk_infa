@@ -1,7 +1,5 @@
 import pygame
 from random import randint
-import os
-import json
 
 pygame.init()
 
