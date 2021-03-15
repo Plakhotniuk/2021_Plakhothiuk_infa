@@ -92,7 +92,7 @@ def random_generate_elements(count):
             element_mass.append(new_ball())
 
 
-random_generate_elements(5)
+
 
 pygame.display.update()
 clock = pygame.time.Clock()
@@ -219,6 +219,8 @@ while not finished:
                     complexity_coef += 3
                     score['Complexity'] = 'Impossible'
                     choose_complexity = True
+                random_generate_elements(5)
+
         pygame.display.flip()
 
     elif enter_name == True and choose_complexity == True:
