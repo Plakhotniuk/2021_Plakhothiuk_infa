@@ -102,6 +102,81 @@ enter_name = False
 choose_complexity = False
 
 
+def move_element(mass):
+    """
+    Двигает фигурки
+    :param mass: массив фигурок
+    :return:
+    """
+    for elem in mass:
+        if elem['code'] == 1:
+            elem['x'] += elem['velocity_x']
+            elem['y'] += elem['velocity_y']
+
+            if elem['x'] >= screensize[0] - elem['radius']:
+                elem['velocity_x'] *= -1
+                elem['velocity_y'] = randint(-5, 5)
+            if elem['x'] <= elem['radius']:
+                elem['velocity_x'] *= -1
+                elem['velocity_y'] = randint(-5, 5)
+            if elem['y'] >= screensize[1] - elem['radius']:
+                elem['velocity_y'] *= -1
+                elem['velocity_x'] = randint(-5, 5)
+            if elem['y'] <= elem['radius']:
+                elem['velocity_y'] *= -1
+                elem['velocity_x'] = randint(-5, 5)
+            draw_ball(elem['color'], elem['x'], elem['y'], elem['radius'])
+        elif elem['code'] == 2:
+            elem['x'] += elem['velocity_x']
+            elem['y'] += elem['velocity_y']
+            if screensize[0] // 2 <= elem['x'] <= screensize[0] // 2 + 3:
+                elem['velocity_y'] = randint(-5, 5)
+                elem['velocity_x'] = randint(-5, 5)
+            if screensize[1] // 2 <= elem['y'] <= screensize[1] // 2 + 3:
+                elem['velocity_y'] = randint(-5, 5)
+                elem['velocity_x'] = randint(-5, 5)
+            if elem['x'] >= screensize[0] - elem['radius'] // 2:
+                elem['velocity_x'] *= -1
+                elem['velocity_y'] = randint(-5, 5)
+            if elem['x'] <= elem['radius'] // 2:
+                elem['velocity_x'] *= -1
+                elem['velocity_y'] = randint(-5, 5)
+            if elem['y'] >= screensize[1] - elem['radius'] // 2:
+                elem['velocity_y'] *= -1
+                elem['velocity_x'] = randint(-5, 5)
+            if elem['y'] <= elem['radius'] // 2:
+                elem['velocity_y'] *= -1
+                elem['velocity_x'] = randint(-5, 5)
+            draw_square(elem['color'], elem['x'], elem['y'], elem['radius'])
+
+
+def gotcha():
+    """
+    Прибавляет различное количество очков при попадании в кружок и квадратик
+    """
+    x0, y0 = pygame.mouse.get_pos()
+    i = 0
+    for elem in element_mass:
+        if elem['code'] == 1:
+            if (elem['x'] - x0) ** 2 + (elem['y'] - y0) ** 2 <= elem['radius'] ** 2:
+                if randint(1, 2) == 1:
+                    element_mass[i] = new_ball()
+                else:
+                    element_mass[i] = new_square()
+                score['score'] += 1
+                score['color'] = elem['color']
+        elif elem['code'] == 2:
+            if abs(elem['x'] - x0) <= elem['radius'] // 2 and \
+                    abs(elem['y'] - y0) <= elem['radius'] // 2:
+                if randint(1, 2) == 1:
+                    element_mass[i] = new_ball()
+                else:
+                    element_mass[i] = new_square()
+                score['score'] += 3
+                score['color'] = elem['color']
+        i += 1
+
+
 while not finished:
     clock.tick(FPS)
     if not enter_name:
@@ -158,83 +233,7 @@ while not finished:
                 finished = True
             elif event.type == pygame.MOUSEBUTTONDOWN:
 
-                def gotcha():
-                    """
-                    Прибавляет различное количество очков при попадании в кружок и квадратик
-                    """
-                    x0, y0 = pygame.mouse.get_pos()
-                    i = 0
-                    for elem in element_mass:
-                        if elem['code'] == 1:
-                            if (elem['x'] - x0) ** 2 + (elem['y'] - y0) ** 2 <= elem['radius'] ** 2:
-                                if randint(1, 2) == 1:
-                                    element_mass[i] = new_ball()
-                                else:
-                                    element_mass[i] = new_square()
-                                score['score'] += 1
-                                score['color'] = elem['color']
-                        elif elem['code'] == 2:
-                            if abs(elem['x'] - x0) <= elem['radius'] // 2 and \
-                                    abs(elem['y'] - y0) <= elem['radius'] // 2:
-                                if randint(1, 2) == 1:
-                                    element_mass[i] = new_ball()
-                                else:
-                                    element_mass[i] = new_square()
-                                score['score'] += 3
-                                score['color'] = elem['color']
-                        i += 1
-
-
                 gotcha()
-
-
-        def move_element(mass):
-            """
-            Двигает фигурки
-            :param mass: массив фигурок
-            :return:
-            """
-            for elem in mass:
-                if elem['code'] == 1:
-                    elem['x'] += elem['velocity_x']
-                    elem['y'] += elem['velocity_y']
-
-                    if elem['x'] >= screensize[0] - elem['radius']:
-                        elem['velocity_x'] *= -1
-                        elem['velocity_y'] = randint(-5, 5)
-                    if elem['x'] <= elem['radius']:
-                        elem['velocity_x'] *= -1
-                        elem['velocity_y'] = randint(-5, 5)
-                    if elem['y'] >= screensize[1] - elem['radius']:
-                        elem['velocity_y'] *= -1
-                        elem['velocity_x'] = randint(-5, 5)
-                    if elem['y'] <= elem['radius']:
-                        elem['velocity_y'] *= -1
-                        elem['velocity_x'] = randint(-5, 5)
-                    draw_ball(elem['color'], elem['x'], elem['y'], elem['radius'])
-                elif elem['code'] == 2:
-                    elem['x'] += elem['velocity_x']
-                    elem['y'] += elem['velocity_y']
-                    if screensize[0] // 2 <= elem['x'] <= screensize[0] // 2 + 3:
-                        elem['velocity_y'] = randint(-5, 5)
-                        elem['velocity_x'] = randint(-5, 5)
-                    if screensize[1] // 2 <= elem['y'] <= screensize[1] // 2 + 3:
-                        elem['velocity_y'] = randint(-5, 5)
-                        elem['velocity_x'] = randint(-5, 5)
-                    if elem['x'] >= screensize[0] - elem['radius'] // 2:
-                        elem['velocity_x'] *= -1
-                        elem['velocity_y'] = randint(-5, 5)
-                    if elem['x'] <= elem['radius'] // 2:
-                        elem['velocity_x'] *= -1
-                        elem['velocity_y'] = randint(-5, 5)
-                    if elem['y'] >= screensize[1] - elem['radius'] // 2:
-                        elem['velocity_y'] *= -1
-                        elem['velocity_x'] = randint(-5, 5)
-                    if elem['y'] <= elem['radius'] // 2:
-                        elem['velocity_y'] *= -1
-                        elem['velocity_x'] = randint(-5, 5)
-                    draw_square(elem['color'], elem['x'], elem['y'], elem['radius'])
-
 
         move_element(element_mass)
 
