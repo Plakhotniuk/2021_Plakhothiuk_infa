@@ -18,12 +18,10 @@ COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
 
 score = {'score': 0, 'color': COLORS[randint(0, 5)], 'Username': '', 'Complexity': ''}
 
-complexity_coef = 1
 
-
-def new_ball():
+def new_ball(complexity_coef):
     """
-    Создает кружок
+    :param complexity_coef:
     :return: возвращает кружок с его рандомными параметрами
     """
     ball_code = 1
@@ -38,9 +36,9 @@ def new_ball():
     return ball_element
 
 
-def new_square():
+def new_square(complexity_coef):
     """
-    Создает квадратик
+    :param complexity_coef:
     :return: возвращает квадратик с его рандомными параметрами
     """
     square_code = 2
@@ -74,32 +72,25 @@ def draw_ball(color, x, y, radius):
 element_mass = []
 
 
-massive_of_gamers = []
-
-
-def random_generate_elements(count):
+def random_generate_elements(count, complexity_coef):
     """
     :param count: количество фигурок
+    :param complexity_coef: Коэффициент сложности
     :return: рандомное распределение количества фигурок и вызов функций,
     рисующих их
     """
+
     balls = randint(0, count)
 
     for j in range(count):
         if j >= balls:
-            element_mass.append((new_square()))
+            element_mass.append((new_square(complexity_coef)))
         else:
-            element_mass.append(new_ball())
-
-
+            element_mass.append(new_ball(complexity_coef))
 
 
 pygame.display.update()
 clock = pygame.time.Clock()
-
-finished = False
-enter_name = False
-choose_complexity = False
 
 
 def move_element(mass):
@@ -150,97 +141,110 @@ def move_element(mass):
             draw_square(elem['color'], elem['x'], elem['y'], elem['radius'])
 
 
-def gotcha():
+def gotcha(complexity_coef):
     """
-    Прибавляет различное количество очков при попадании в кружок и квадратик
+    :param complexity_coef: Коэффициент сложности
+    :return: Прибавляет различное количество очков при попадании в кружок и квадратик
     """
+
     x0, y0 = pygame.mouse.get_pos()
     i = 0
     for elem in element_mass:
         if elem['code'] == 1:
             if (elem['x'] - x0) ** 2 + (elem['y'] - y0) ** 2 <= elem['radius'] ** 2:
                 if randint(1, 2) == 1:
-                    element_mass[i] = new_ball()
+                    element_mass[i] = new_ball(complexity_coef)
                 else:
-                    element_mass[i] = new_square()
+                    element_mass[i] = new_square(complexity_coef)
                 score['score'] += 1
                 score['color'] = elem['color']
         elif elem['code'] == 2:
             if abs(elem['x'] - x0) <= elem['radius'] // 2 and \
                     abs(elem['y'] - y0) <= elem['radius'] // 2:
                 if randint(1, 2) == 1:
-                    element_mass[i] = new_ball()
+                    element_mass[i] = new_ball(complexity_coef)
                 else:
-                    element_mass[i] = new_square()
+                    element_mass[i] = new_square(complexity_coef)
                 score['score'] += 3
                 score['color'] = elem['color']
         i += 1
 
 
-while not finished:
-    clock.tick(FPS)
-    if not enter_name:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                finished = True
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:
-                    score['Username'] = score['Username'].replace("\n", "")
-                    enter_name = True
-                if event.key == pygame.K_BACKSPACE:
-                    score['Username'] = score['Username'][:-1]
-                elif event.key != pygame.K_BACKSPACE and event.key != pygame.K_RETURN:
-                    score['Username'] += event.unicode
+def game():
+    """
+    :return: Запускает игровой процесс
+    """
+    complexity_coef = 1
+    finished = False
+    enter_name = False
+    choose_complexity = False
+    while not finished:
+        clock.tick(FPS)
+        if not enter_name:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    finished = True
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        score['Username'] = score['Username'].replace("\n", "")
+                        enter_name = True
+                    if event.key == pygame.K_BACKSPACE:
+                        score['Username'] = score['Username'][:-1]
+                    elif event.key != pygame.K_BACKSPACE and event.key != pygame.K_RETURN:
+                        score['Username'] += event.unicode
 
-        start_screen = pygame.font.SysFont('Times New Roman', 40)
-        start_text = start_screen.render(("Write your name to start the game: " + score['Username']), True,
-                                         score['color'])
-        screen.blit(start_text, (screensize[0] // 5, screensize[1] // 4))
-        pygame.display.flip()
+            start_screen = pygame.font.SysFont('Times New Roman', 40)
+            start_text = start_screen.render(("Write your name to start the game: " + score['Username']), True,
+                                             score['color'])
+            screen.blit(start_text, (screensize[0] // 5, screensize[1] // 4))
+            pygame.display.flip()
 
-    elif enter_name == True and choose_complexity == False:
-        start_screen = pygame.font.SysFont('Times New Roman', 30)
-        start_text = start_screen.render("Choose complexity: 1 - Normal 2 - Hard  3 - Impossible", True,
-                                         score['color'])
-        screen.blit(start_text, (screensize[0] // 8, screensize[1] // 4))
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                finished = True
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_1:
-                    complexity_coef += 1
-                    score['Complexity'] = 'Normal'
-                    choose_complexity = True
-                elif event.key == pygame.K_2:
-                    complexity_coef += 1.5
-                    score['Complexity'] = 'Hard'
-                    choose_complexity = True
-                elif event.key == pygame.K_3:
-                    complexity_coef += 3
-                    score['Complexity'] = 'Impossible'
-                    choose_complexity = True
-                random_generate_elements(5)
+        elif enter_name == True and choose_complexity == False:
+            start_screen = pygame.font.SysFont('Times New Roman', 30)
+            start_text = start_screen.render("Choose complexity: 1 - Normal 2 - Hard  3 - Impossible", True,
+                                             score['color'])
+            screen.blit(start_text, (screensize[0] // 8, screensize[1] // 4))
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    finished = True
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_1:
+                        complexity_coef += 1
+                        score['Complexity'] = 'Normal'
+                        choose_complexity = True
+                    elif event.key == pygame.K_2:
+                        complexity_coef += 1.5
+                        score['Complexity'] = 'Hard'
+                        choose_complexity = True
+                    elif event.key == pygame.K_3:
+                        complexity_coef += 3
+                        score['Complexity'] = 'Impossible'
+                        choose_complexity = True
+                    random_generate_elements(5, complexity_coef)
 
-        pygame.display.flip()
+            pygame.display.flip()
 
-    elif enter_name == True and choose_complexity == True:
-        myfont = pygame.font.SysFont('Times New Roman', 30)
-        scoretext = myfont.render(("Chosen complexity: " + score['Complexity'] +
-                                   "   |   " + score['Username'] + "'s score = " +
-                                   str(score['score'])), True, score['color'])
-        screen.blit(scoretext, (screensize[0] // 8, 30))
-        for event in pygame.event.get():
+        elif enter_name == True and choose_complexity == True:
+            myfont = pygame.font.SysFont('Times New Roman', 30)
+            scoretext = myfont.render(("Chosen complexity: " + score['Complexity'] +
+                                       "   |   " + score['Username'] + "'s score = " +
+                                       str(score['score'])), True, score['color'])
+            screen.blit(scoretext, (screensize[0] // 8, 30))
+            for event in pygame.event.get():
 
-            if event.type == pygame.QUIT:
-                finished = True
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.type == pygame.QUIT:
+                    finished = True
+                elif event.type == pygame.MOUSEBUTTONDOWN:
 
-                gotcha()
+                    gotcha(complexity_coef)
 
-        move_element(element_mass)
+            move_element(element_mass)
 
-    pygame.display.update()
-    screen.fill(BLACK)
+        pygame.display.update()
+        screen.fill(BLACK)
+
+
+game()
 
 pygame.quit()
 
