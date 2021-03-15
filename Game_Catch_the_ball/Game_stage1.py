@@ -240,7 +240,6 @@ while not finished:
         move_element(element_mass)
 
     pygame.display.update()
-
     screen.fill(BLACK)
 
 pygame.quit()
