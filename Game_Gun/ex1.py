@@ -11,8 +11,7 @@ root.geometry('800x600')
 canv = tk.Canvas(root, bg='white')
 canv.pack(fill=tk.BOTH, expand=1)
 
-
-class ball():
+class Ball:
     def __init__(self, x=40, y=450):
         """ Конструктор класса ball
 
@@ -25,6 +24,7 @@ class ball():
         self.r = 10
         self.vx = 0
         self.vy = 0
+        self.a = 2
         self.color = choice(['blue', 'green', 'red', 'brown'])
         self.id = canv.create_oval(
                 self.x - self.r,
@@ -54,24 +54,39 @@ class ball():
         # FIXME
         self.x += self.vx
         self.y -= self.vy
+        self.vy -= self.a
+        if self.x + self.r >= 800 or self.x - self.r <= 0:
+            self.vx *= (-1)
+
+            self.live -= 1
+        if self.y + self.r >= 600 or self.y + self.r <= 0:
+            self.vy *= -1
+            self.vy = abs(self.vy) // 1.5
+            self.live -= 1
+
+        self.set_coords()
 
     def hittest(self, obj):
         """Функция проверяет сталкивалкивается ли данный обьект с целью, описываемой в обьекте obj.
-
         Args:
             obj: Обьект, с которым проверяется столкновение.
         Returns:
             Возвращает True в случае столкновения мяча и цели. В противном случае возвращает False.
         """
         # FIXME
+        if (self.x - obj.x)**2 + (self.y - obj.y)**2 <= (self.r + obj.r)**2:
+            return True
+        else:
             return False
 
 
-class gun():
-    self.f2_power = 10
-    self.f2_on = 0
-    self.an = 1
-    # self.id = canv.create_line(20,450,50,420,width=7) # FIXME: don't know how to set it...
+class Gun():
+    def __init__(self):
+        self.f2_power = 10
+        self.f2_on = 0
+        self.an = 1
+        self.x = 20
+        self.id = canv.create_line(self.x, 450, 50, 420, width=7) # FIXME: don't know how to set it...
 
     def fire2_start(self, event):
         self.f2_on = 1
@@ -84,7 +99,7 @@ class gun():
         """
         global balls, bullet
         bullet += 1
-        new_ball = ball()
+        new_ball = Ball()
         new_ball.r += 5
         self.an = math.atan((event.y-new_ball.y) / (event.x-new_ball.x))
         new_ball.vx = self.f2_power * math.cos(self.an)
@@ -93,7 +108,7 @@ class gun():
         self.f2_on = 0
         self.f2_power = 10
 
-    def targetting(self, event=0):
+    def targetting(self, event):
         """Прицеливание. Зависит от положения мыши."""
         if event:
             self.an = math.atan((event.y-450) / (event.x-20))
@@ -115,13 +130,18 @@ class gun():
             canv.itemconfig(self.id, fill='black')
 
 
-class target():
-    self.points = 0
-    self.live = 1
-    # FIXME: don't work!!! How to call this functions when object is created?
-    # self.id = canv.create_oval(0,0,0,0)
-    # self.id_points = canv.create_text(30,30,text = self.points,font = '28')
-    # self.new_target()
+class Target:
+    def __init__(self):
+        self.points = 0
+        self.live = 1
+        self.x = rnd(600, 780)
+        self.y = rnd(300, 550)
+        self.r = rnd(2, 50)
+        self.color = 'red'
+        # FIXME: don't work!!! How to call this functions when object is created?
+        self.id = canv.create_oval(0, 0, 0, 0)
+        self.id_points = canv.create_text(30, 30, text = self.points, font = '28')
+        self.new_target()
 
     def new_target(self):
         """ Инициализация новой цели. """
@@ -139,9 +159,9 @@ class target():
         canv.itemconfig(self.id_points, text=self.points)
 
 
-t1 = target()
+t1 = Target()
 screen1 = canv.create_text(400, 300, text='', font='28')
-g1 = gun()
+g1 = Gun()
 bullet = 0
 balls = []
 
@@ -168,7 +188,7 @@ def new_game(event=''):
                 canv.itemconfig(screen1, text='Вы уничтожили цель за ' + str(bullet) + ' выстрелов')
         canv.update()
         time.sleep(0.03)
-        g1.targetting()
+        g1.targetting(event)
         g1.power_up()
     canv.itemconfig(screen1, text='')
     canv.delete(gun)
@@ -177,4 +197,4 @@ def new_game(event=''):
 
 new_game()
 
-mainloop()
+root.mainloop()
