@@ -66,6 +66,14 @@ def draw_square(color, x, y, side):
 
 
 def draw_ball(color, x, y, radius):
+    """
+    Draws ball
+    :param color:
+    :param x:
+    :param y:
+    :param radius:
+    :return:
+    """
     pygame.draw.circle(screen, color, (x, y), radius)
 
 
