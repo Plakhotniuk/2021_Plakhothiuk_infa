@@ -1,15 +1,30 @@
-from random import randrange as rnd, choice
-import tkinter as tk
+import pygame
+from random import randint
 import math
 import time
 
-# print (dir(math))
+pygame.init()
 
-root = tk.Tk()
-fr = tk.Frame(root)
-root.geometry('800x600')
-canv = tk.Canvas(root, bg='white')
-canv.pack(fill=tk.BOTH, expand=1)
+
+FPS = 60
+screensize = (1200, 800)
+screen = pygame.display.set_mode(screensize, pygame.SRCALPHA)
+
+RED = (255, 0, 0)
+BLUE = (0, 0, 255)
+YELLOW = (255, 255, 0)
+GREEN = (0, 255, 0)
+MAGENTA = (255, 0, 255)
+CYAN = (0, 255, 255)
+BLACK = (0, 0, 0)
+COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
+
+
+# root = tk.Tk()
+# fr = tk.Frame(root)
+# root.geometry('800x600')
+# canv = tk.Canvas(root, bg='white')
+# canv.pack(fill=tk.BOTH, expand=1)
 
 class Ball:
     def __init__(self, x=40, y=450):
@@ -25,24 +40,18 @@ class Ball:
         self.vx = 0
         self.vy = 0
         self.a = 2
-        self.color = choice(['blue', 'green', 'red', 'brown'])
-        self.id = canv.create_oval(
-                self.x - self.r,
-                self.y - self.r,
-                self.x + self.r,
-                self.y + self.r,
-                fill=self.color
-        )
+        self.color = COLORS[randint(0, 5)]
+        self.id = pygame.draw.circle(screen, self.color, (self.x, self.y), self.r)
         self.live = 30
 
-    def set_coords(self):
-        canv.coords(
-                self.id,
-                self.x - self.r,
-                self.y - self.r,
-                self.x + self.r,
-                self.y + self.r
-        )
+    # def set_coords(self):
+    #     canv.coords(
+    #             self.id,
+    #             self.x - self.r,
+    #             self.y - self.r,
+    #             self.x + self.r,
+    #             self.y + self.r
+    #     )
 
     def move(self):
         """Переместить мяч по прошествии единицы времени.
@@ -57,14 +66,13 @@ class Ball:
         self.vy -= self.a
         if self.x + self.r >= 800 or self.x - self.r <= 0:
             self.vx *= (-1)
-
             self.live -= 1
         if self.y + self.r >= 600 or self.y + self.r <= 0:
             self.vy *= -1
             self.vy = abs(self.vy) // 1.5
             self.live -= 1
 
-        self.set_coords()
+        # self.set_coords()
 
     def hittest(self, obj):
         """Функция проверяет сталкивалкивается ли данный обьект с целью, описываемой в обьекте obj.
@@ -73,20 +81,22 @@ class Ball:
         Returns:
             Возвращает True в случае столкновения мяча и цели. В противном случае возвращает False.
         """
-        # FIXME
         if (self.x - obj.x)**2 + (self.y - obj.y)**2 <= (self.r + obj.r)**2:
             return True
         else:
             return False
 
 
-class Gun():
+class Gun:
     def __init__(self):
         self.f2_power = 10
         self.f2_on = 0
+        self.color = YELLOW
         self.an = 1
         self.x = 20
-        self.id = canv.create_line(self.x, 450, 50, 420, width=7) # FIXME: don't know how to set it...
+        self.y = 400
+        self.x_move =
+        self.id = pygame.draw.line(screen, self.color, (self.x, self.y), 420, width=7) # FIXME: don't know how to set it...
 
     def fire2_start(self, event):
         self.f2_on = 1
@@ -134,10 +144,11 @@ class Target:
     def __init__(self):
         self.points = 0
         self.live = 1
-        self.x = rnd(600, 780)
-        self.y = rnd(300, 550)
-        self.r = rnd(2, 50)
+        self.x = randint(600, 780)
+        self.y = randint(300, 550)
+        self.r = randint(2, 50)
         self.color = 'red'
+        self.number_of_targets = 3
         # FIXME: don't work!!! How to call this functions when object is created?
         self.id = canv.create_oval(0, 0, 0, 0)
         self.id_points = canv.create_text(30, 30, text = self.points, font = '28')
@@ -145,9 +156,9 @@ class Target:
 
     def new_target(self):
         """ Инициализация новой цели. """
-        x = self.x = rnd(600, 780)
-        y = self.y = rnd(300, 550)
-        r = self.r = rnd(2, 50)
+        x = self.x = randint(600, 780)
+        y = self.y = randint(300, 550)
+        r = self.r = randint(2, 50)
         color = self.color = 'red'
         canv.coords(self.id, x-r, y-r, x+r, y+r)
         canv.itemconfig(self.id, fill=color)
@@ -159,6 +170,8 @@ class Target:
         canv.itemconfig(self.id_points, text=self.points)
 
 
+number_of_targets = 2
+targets = []
 t1 = Target()
 screen1 = canv.create_text(400, 300, text='', font='28')
 g1 = Gun()
@@ -167,8 +180,12 @@ balls = []
 
 
 def new_game(event=''):
-    global gun, t1, screen1, balls, bullet
-    t1.new_target()
+    global gun, t1, screen1, balls, bullet, targets
+    for i in range(number_of_targets):
+        t = Target()
+        t.new_target()
+        targets.append(t)
+
     bullet = 0
     balls = []
     canv.bind('<Button-1>', g1.fire2_start)
