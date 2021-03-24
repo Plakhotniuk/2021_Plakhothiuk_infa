@@ -57,7 +57,7 @@ class Ball:
         self.coord_y = randint(self.radius, screensize[1] - self.radius)
         self.velocity_x = int(randint(-5, 5))
         self.velocity_y = int(randint(-5, 5))
-        self.gravitation = 0.1
+        self.gravitation = 0
         self.health = 30
         self.is_alive = True
 
@@ -74,6 +74,7 @@ class Ball:
         self.coord_x += self.velocity_x
         self.coord_y -= self.velocity_y
         self.velocity_y -= self.gravitation
+
         if self.coord_x >= screensize[0] - self.radius or self.coord_x <= self.radius:
             self.velocity_x *= -0.9
             self.health -= 2
@@ -118,12 +119,9 @@ class BallTarget(Ball):
         if (self.coord_x - obj.coord_x) ** 2 + (self.coord_y - obj.coord_y) ** 2 <= (self.radius + obj.radius) ** 2:
             self.health -= 100
 
-            player.shoots += 1
             player.score += 1
             if self.health <= 0:
                 self.is_alive = False
-
-        # return self.is_alive
 
 
 class Gun:
@@ -149,7 +147,7 @@ class Gun:
         new_ball.radius = 10
 
         x0, y0 = pygame.mouse.get_pos()
-        print(x0, y0)
+
         if x0 == self.x:
             pass
         else:
@@ -161,10 +159,9 @@ class Gun:
         new_ball.coord_y = self.y - self.length * math.sin(self.angle)
         element_mass['massive'].append(new_ball)
         self.power = 0
-        self.length /= 1.5
+        self.length = 70
         self.color = BLACK
         self.shoot_mode = False
-        self.draw_gan()
 
     def draw_gan(self):
         pygame.draw.line(screen, self.color, (self.x, self.y),
@@ -172,7 +169,6 @@ class Gun:
 
     def targeting(self):
         x0, y0 = pygame.mouse.get_pos()
-        print(x0, y0)
         if x0 == self.x:
             pass
         else:
@@ -193,79 +189,72 @@ class Gun:
             if self.power < 100:
                 self.power += 0.5
             self.color = RED
-            self.draw_gan()
+
         else:
             self.color = BLACK
-        self.draw_gan()
+
 
 
 pygame.display.update()
 clock = pygame.time.Clock()
 
 
+def generate_targets(number_of_targets):
+    for i in range(number_of_targets):
+        targets_mass['massive'].append(BallTarget())
+
+finished = False
 
 def game():
     """
     :return:Game
     """
-    def new_massive(mass, ind):
-        new_mass = []
-        for i in range(len(mass) - 1):
-            if i < ind:
-                new_mass[i] = mass[i]
-            if i > ind:
-                new_mass[i - 1] = mass[i]
-        return new_mass
-
-    def generate_targets(number_of_targets):
-        for i in range(number_of_targets):
-            targets_mass['massive'].append(BallTarget())
-
+    global finished
     generate_targets(5)
-    counter = 10
-
+    counter = 0
     new_gun = Gun()
-    finished = False
     finished_session = False
-    while not finished:
-        new_player = Player()
+    finished_session1 = False
+    new_player = Player()
+    element_mass['massive'].clear()
+    while not finished_session:
+
         clock.tick(FPS)
-        myfont = pygame.font.SysFont('Times New Roman', 30)
-        scoretext = myfont.render((str(new_player.score)), True, BLACK)
-        screen.blit(scoretext, (screensize[0] // 8, 30))
-        if finished_session:
+        if not finished_session1:
+            myfont = pygame.font.SysFont('Times New Roman', 30)
+            scoretext = myfont.render((str(new_player.shoots)), True, BLACK)
+            screen.blit(scoretext, (screensize[0] // 8, 30))
+        if finished_session1:
             myfont2 = pygame.font.SysFont('Times New Roman', 30)
-            finish_session_text = myfont2.render(("Вы уничтожили все цели за:" + str(new_player.get_shoots())),
+            finish_session_text = myfont2.render(("Вы уничтожили все цели за: " + str(new_player.shoots)),
                                                  True, BLACK)
             screen.blit(finish_session_text, (screensize[0] // 2, screensize[1] // 2))
-            pygame.time.set_timer(pygame.USEREVENT, 1000)
-            for event in pygame.event.get():
-                if event.type == pygame.USEREVENT:
-                    counter -= 1
-                    if counter < -2:
-                        finished_session = False
-                if event.type == pygame.QUIT:
-                    finished = False
+            counter += 1
+            if counter == 150:
+                finished_session = True
 
         for event in pygame.event.get():
 
             if event.type == pygame.QUIT:
                 finished = True
+                finished_session = True
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 new_gun.fire2_start()
             elif event.type == pygame.MOUSEBUTTONUP:
                 new_gun.fire2_end()
-                new_player.set_shoots()
+                new_player.shoots += 1
+
         new_gun.targeting()
         new_gun.power_up()
 
         targets_mass['remove ind'] = -1
         element_mass['remove ind'] = -1
-
         for i in range(len(targets_mass['massive'])):
             targets_mass['massive'][i].move_target()
+        for j in range(len(element_mass['massive'])):
+            element_mass['massive'][j].move_ball()
+        for i in range(len(targets_mass['massive'])):
             for j in range(len(element_mass['massive'])):
-                element_mass['massive'][j].move_ball()
                 if not element_mass['massive'][j].is_alive:
                     element_mass['remove ind'] = j
                 if not targets_mass['massive'][i].is_alive:
@@ -283,12 +272,13 @@ def game():
             element_mass['massive'].remove(element_mass['massive'][element_mass['remove ind']])
 
         if not targets_mass['massive']:
-            finished_session = True
+            finished_session1 = True
 
         pygame.display.update()
         screen.fill(WHITE)
 
 
-game()
+while not finished:
+    game()
 
 pygame.quit()
