@@ -58,12 +58,14 @@ class Ball:
         self.gravitation = 0.2
         self.health = 30
         self.is_alive = True
+        self.time_of_live = 300
 
     def draw_ball(self):
         """
         Draws ball
         """
         pygame.draw.circle(screen, self.color, (self.coord_x, self.coord_y), self.radius)
+        self.time_of_live -= 1
 
     def move_ball(self):
         """
@@ -74,14 +76,12 @@ class Ball:
         self.velocity_y -= self.gravitation
 
         if self.coord_x > screensize[0] - self.radius or self.coord_x < self.radius:
-            self.velocity_x *= -0.9
-            self.health -= 1
+            self.velocity_x *= -0.95
         if self.coord_y > screensize[1] - 50:
-            self.velocity_y *= -0.9
-            self.health -= 1
+            self.velocity_y *= -0.95
         if abs(self.velocity_y) < 0.001:
             self.velocity_y = 0
-        if self.health <= 0:
+        if self.time_of_live == 0:
             self.is_alive = False
         self.draw_ball()
         pygame.draw.circle(screen, BLACK, (self.coord_x, self.coord_y), self.radius, width=2)
