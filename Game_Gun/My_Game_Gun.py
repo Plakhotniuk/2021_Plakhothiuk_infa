@@ -1,6 +1,7 @@
 import pygame
 from random import randint
 import math
+import time
 
 pygame.init()
 
@@ -18,9 +19,9 @@ CYAN = (0, 255, 255)
 BLACK = (0, 0, 0)
 COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
 
-element_mass = []
+element_mass = {'massive': [], 'remove ind': -1}
 
-targets_mass = []
+targets_mass = {'massive': [], 'remove ind': -1}
 
 
 class Player:
@@ -56,7 +57,9 @@ class Ball:
         self.coord_y = randint(self.radius, screensize[1] - self.radius)
         self.velocity_x = int(randint(-5, 5))
         self.velocity_y = int(randint(-5, 5))
-        self.gravitation = 1.1
+        self.gravitation = 0.1
+        self.health = 30
+        self.is_alive = True
 
     def draw_ball(self):
         """
@@ -69,17 +72,21 @@ class Ball:
         :return: Moves ball
         """
         self.coord_x += self.velocity_x
-        self.coord_y += self.velocity_y
-        self.velocity_y /= self.gravitation
+        self.coord_y -= self.velocity_y
+        self.velocity_y -= self.gravitation
         if self.coord_x >= screensize[0] - self.radius or self.coord_x <= self.radius:
-            self.velocity_x *= -0.8
+            self.velocity_x *= -0.9
+            self.health -= 2
         if self.coord_y >= screensize[1] - 50:
-            self.velocity_y *= -0.8
-        if abs(self.velocity_x) < 0.1:
+            self.velocity_y *= -0.9
+            self.health -= 2
+        if abs(self.velocity_x) < 0.05:
             self.velocity_x = 0
-        if abs(self.velocity_y) < 0.1:
+        if abs(self.velocity_y) < 0.05:
             self.velocity_y = 0
         self.draw_ball()
+        if self.health <= 0:
+            self.is_alive = False
 
 
 class BallTarget(Ball):
@@ -116,11 +123,11 @@ class BallTarget(Ball):
             if self.health <= 0:
                 self.is_alive = False
 
-        return self.is_alive
+        # return self.is_alive
 
 
 class Gun:
-    def __init__(self, x=40, y=500, color=BLACK, length=50, angle=0, shoot_mode=False, power=0):
+    def __init__(self, x=40, y=500, color=BLACK, length=70, angle=0, shoot_mode=False, power=0):
         self.x = x
         self.y = y
         self.color = color
@@ -128,6 +135,7 @@ class Gun:
         self.angle = angle
         self.shoot_mode = shoot_mode
         self.power = power
+        self.maxlength = length*1.5
 
     def fire2_start(self):
         self.shoot_mode = True
@@ -141,78 +149,91 @@ class Gun:
         new_ball.radius = 10
 
         x0, y0 = pygame.mouse.get_pos()
+        print(x0, y0)
         if x0 == self.x:
             pass
         else:
-            self.angle = math.atan((y0 - self.y) / (x0 - self.x))
-        new_ball.vx = self.power * math.cos(self.angle)
-        new_ball.vy = - self.power * math.sin(self.angle)
+            self.angle = -math.atan((y0 - self.y) / (x0 - self.x))
+        new_ball.velocity_x = self.power * math.cos(self.angle)
+        new_ball.velocity_y = self.power * math.sin(self.angle)
 
-        new_ball.coord_x = self.length * math.cos(self.angle)
-        new_ball.coord_y = self.length * math.sin(self.angle)
-        element_mass.append(new_ball)
+        new_ball.coord_x = self.x + self.length * math.cos(self.angle)
+        new_ball.coord_y = self.y - self.length * math.sin(self.angle)
+        element_mass['massive'].append(new_ball)
+        self.power = 0
+        self.length /= 1.5
+        self.color = BLACK
+        self.shoot_mode = False
+        self.draw_gan()
 
     def draw_gan(self):
         pygame.draw.line(screen, self.color, (self.x, self.y),
-                         (self.length * math.cos(self.angle), self.length * math.sin(self.angle)))
+                         (self.x + self.length * math.cos(self.angle), self.y - self.length * math.sin(self.angle)), width=7)
 
     def targeting(self):
-
-        for event in pygame.event.get():
-            x0, y0 = pygame.mouse.get_pos()
-            if x0 == self.x:
-                pass
-            else:
-                self.angle = math.atan((y0 - self.y) / (x0 - self.x))
-            if self.length >= 70:
+        x0, y0 = pygame.mouse.get_pos()
+        print(x0, y0)
+        if x0 == self.x:
+            pass
+        else:
+            self.angle = -math.atan((y0 - self.y) / (x0 - self.x))
+        if self.shoot_mode:
+            self.color = RED
+            if self.length >= self.maxlength:
                 pass
             else:
                 self.length += 1
+        else:
+            self.color = BLACK
 
-            if self.shoot_mode:
-                self.color = YELLOW
-            else:
-                self.color = BLACK
-
-            self.draw_gan()
+        self.draw_gan()
 
     def power_up(self):
         if self.shoot_mode:
             if self.power < 100:
-                self.power += 1
-            self.color = YELLOW
+                self.power += 0.5
+            self.color = RED
             self.draw_gan()
         else:
-            self.color = YELLOW
-            self.draw_gan()
+            self.color = BLACK
+        self.draw_gan()
 
 
 pygame.display.update()
 clock = pygame.time.Clock()
 
 
+
 def game():
     """
     :return:Game
     """
+    def new_massive(mass, ind):
+        new_mass = []
+        for i in range(len(mass) - 1):
+            if i < ind:
+                new_mass[i] = mass[i]
+            if i > ind:
+                new_mass[i - 1] = mass[i]
+        return new_mass
 
     def generate_targets(number_of_targets):
         for i in range(number_of_targets):
-            targets_mass.append(BallTarget())
+            targets_mass['massive'].append(BallTarget())
 
     generate_targets(5)
     counter = 10
 
-    new_gun = Gun
+    new_gun = Gun()
     finished = False
     finished_session = False
     while not finished:
-        new_player = Player
+        new_player = Player()
         clock.tick(FPS)
         myfont = pygame.font.SysFont('Times New Roman', 30)
-        scoretext = myfont.render((str(new_player.get_score())), True, BLACK)
+        scoretext = myfont.render((str(new_player.score)), True, BLACK)
         screen.blit(scoretext, (screensize[0] // 8, 30))
-        if not finished_session:
+        if finished_session:
             myfont2 = pygame.font.SysFont('Times New Roman', 30)
             finish_session_text = myfont2.render(("Вы уничтожили все цели за:" + str(new_player.get_shoots())),
                                                  True, BLACK)
@@ -227,6 +248,7 @@ def game():
                     finished = False
 
         for event in pygame.event.get():
+
             if event.type == pygame.QUIT:
                 finished = True
             elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -234,18 +256,34 @@ def game():
             elif event.type == pygame.MOUSEBUTTONUP:
                 new_gun.fire2_end()
                 new_player.set_shoots()
-            new_gun.targeting()
-        for t in targets_mass:
-            t.move_target()
-            for b in element_mass:
-                b.move_ball()
-                t.hit_enemy(b, new_player)
-                if not t.isalive:
-                    targets_mass.remove(t)
-        if not targets_mass:
-            finished_session = False
+        new_gun.targeting()
+        new_gun.power_up()
 
+        targets_mass['remove ind'] = -1
+        element_mass['remove ind'] = -1
 
+        for i in range(len(targets_mass['massive'])):
+            targets_mass['massive'][i].move_target()
+            for j in range(len(element_mass['massive'])):
+                element_mass['massive'][j].move_ball()
+                if not element_mass['massive'][j].is_alive:
+                    element_mass['remove ind'] = j
+                if not targets_mass['massive'][i].is_alive:
+                    targets_mass['remove ind'] = i
+                targets_mass['massive'][i].hit_enemy(element_mass['massive'][j], new_player)
+
+        if targets_mass['remove ind'] == -1:
+            pass
+        else:
+            targets_mass['massive'].remove(targets_mass['massive'][targets_mass['remove ind']])
+
+        if element_mass['remove ind'] == -1:
+            pass
+        else:
+            element_mass['massive'].remove(element_mass['massive'][element_mass['remove ind']])
+
+        if not targets_mass['massive']:
+            finished_session = True
 
         pygame.display.update()
         screen.fill(WHITE)
