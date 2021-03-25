@@ -30,6 +30,9 @@ class Gun:
         self.power = power
         self.maxlength = length*1.5
         self.activation = activation
+        self.size = 50
+        self.health = 500
+        self.is_alive = True
 
     def fire2_start(self):
         """
@@ -85,8 +88,8 @@ class Gun:
         """
         Draws Gun
         """
-        pygame.draw.rect(screen, self.body_color, (self.x - 45, self.y - 25, 90, 50))
-        pygame.draw.rect(screen, BLACK, (self.x - 45, self.y - 25, 90, 50), width=2)
+        pygame.draw.rect(screen, self.body_color, (self.x - 45, self.y - 25, 90, self.size))
+        pygame.draw.rect(screen, BLACK, (self.x - 45, self.y - 25, 90, self.size), width=2)
         pygame.draw.line(screen, self.color, (self.x, self.y),
                          (self.x + self.length * math.cos(self.angle),
                           self.y - self.length * math.sin(self.angle)), width=7)
@@ -107,7 +110,6 @@ class Gun:
                 self.angle = 3.14 - math.atan((y0 - self.y) / (x0 - self.x))
             else:
                 self.angle = - math.atan((y0 - self.y) / (x0 - self.x))
-            print(self.angle)
         if self.shooting_mode:
             self.color = RED
             if self.length >= self.maxlength:
@@ -118,6 +120,12 @@ class Gun:
             self.color = BLACK
         if not self.activation:
             self.draw_gun()
+
+    def hit_tank(self, obj):
+        if (self.x - obj.coord_x) ** 2 + (self.y - obj.coord_y) ** 2 <= (self.size + obj.radius) ** 2:
+            self.health -= 20
+            if self.health <= 0:
+                self.is_alive = False
 
     def power_up(self):
         """

@@ -102,11 +102,28 @@ def game():
 
         targets_mass['remove ind'] = -1
         element_mass['remove ind'] = -1
+        bombs_massive['remove ind'] = -1
         for i in range(len(targets_mass['massive'])):
             targets_mass['massive'][i].move_target()
-            # if targets_mass['massive'][i].
+            if targets_mass['massive'][i].attack:
+                bombs_massive['massive'].append(Ball(coord_x=targets_mass['massive'][i].coord_x, radius=10,
+                                                     coord_y=targets_mass['massive'][i].coord_y, color=BLACK,
+                                                     velocity_x=0, velocity_y=0, time_of_live=100))
+                targets_mass['massive'][i].attack = False
+
+        for k in range(len(bombs_massive['massive'])):
+            bombs_massive['massive'][k].move_ball()
+            new_gun.hit_tank(bombs_massive['massive'][k])
+            another_new_gun.hit_tank(bombs_massive['massive'][k])
+            if not bombs_massive['massive'][k].is_alive:
+                bombs_massive['remove ind'] = k
+
         for j in range(len(element_mass['massive'])):
             element_mass['massive'][j].move_ball()
+            if len(bombs_massive['massive']) > j:
+                new_gun.hit_tank(bombs_massive['massive'][j])
+                another_new_gun.hit_tank(bombs_massive['massive'][j])
+
         for i in range(len(targets_mass['massive'])):
             for j in range(len(element_mass['massive'])):
                 if not element_mass['massive'][j].is_alive:
@@ -125,6 +142,12 @@ def game():
         else:
             element_mass['massive'].remove(element_mass['massive'][element_mass['remove ind']])
 
+        if bombs_massive['remove ind'] == -1:
+            pass
+        else:
+            bombs_massive['massive'].remove(bombs_massive['massive'][bombs_massive['remove ind']])
+
+        print(new_gun.health)
         if not targets_mass['massive']:
             see_results = True
 

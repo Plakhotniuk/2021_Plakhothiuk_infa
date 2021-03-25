@@ -27,27 +27,30 @@ element_mass = {'massive': [], 'remove ind': -1}
 
 targets_mass = {'massive': [], 'remove ind': -1}
 
+bombs_massive = {'massive': [], 'remove ind': -1}
+
 
 class Ball:
     """
     Class of balls (Shells)
     """
-    def __init__(self):
+    def __init__(self, radius=randint(30, 50), coord_x=0, coord_y=0,
+                 velocity_x=int(randint(0, 10)), velocity_y=int(randint(0, 10)),
+                 time_of_live=300, color=COLORS[randint(0, 5)]):
         """
         Generates random parameters of Ball (color, coord, velocity)
         Default parameters: gravitation, health, is_alive
         """
         self.color = COLORS[randint(0, 5)]
-        self.radius = randint(30, 50)
-        self.coord_x = randint(self.radius, screensize[0] - self.radius)
-        self.coord_y = randint(self.radius+ 50, screensize[1] - 100)
-        self.velocity_x = int(randint(0, 10))
-        self.velocity_y = int(randint(0, 10))
+        self.radius = radius
+        self.coord_x = coord_x
+        self.coord_y = coord_y
+        self.velocity_x = velocity_x
+        self.velocity_y = velocity_y
         self.gravitation = 0.2
         self.health = 30
         self.is_alive = True
-        self.time_of_live = 300
-        self.type = 1
+        self.time_of_live = time_of_live
 
     def draw_ball(self):
         """
@@ -60,24 +63,21 @@ class Ball:
         """
         Moves ball
         """
-        if self.type == 1:
-            self.coord_x += self.velocity_x
-            self.coord_y -= self.velocity_y
-            self.velocity_y -= self.gravitation
 
-            if self.coord_x > screensize[0] - self.radius or self.coord_x < self.radius:
-                self.velocity_x *= -0.95
-            if self.coord_y > screensize[1] - 50:
-                self.velocity_y *= -0.95
-            if abs(self.velocity_y) < 0.001:
-                self.velocity_y = 0
-            if self.time_of_live == 0:
-                self.is_alive = False
-            self.draw_ball()
-            pygame.draw.circle(screen, BLACK, (self.coord_x, self.coord_y), self.radius, width=2)
-        if self.type == 2:
-            self.coord_y -= self.velocity_y
-            self.velocity_y -= self.gravitation
+        self.coord_x += self.velocity_x
+        self.coord_y -= self.velocity_y
+        self.velocity_y -= self.gravitation
+
+        if self.coord_x > screensize[0] - self.radius or self.coord_x < self.radius:
+            self.velocity_x *= -0.95
+        if self.coord_y > screensize[1] - 50:
+            self.velocity_y *= -0.95
+        if abs(self.velocity_y) < 0.001:
+            self.velocity_y = 0
+        if self.time_of_live == 0:
+            self.is_alive = False
+        self.draw_ball()
+        pygame.draw.circle(screen, BLACK, (self.coord_x, self.coord_y), self.radius, width=2)
 
 
 class BallTarget(Ball):
@@ -93,8 +93,10 @@ class BallTarget(Ball):
         super().__init__()
         self.health = health
         self.is_alive = is_alive
-        self.time_attack = 300
+        self.time_attack = randint(1, 1000)
         self.attack = False
+        self.coord_x = randint(100, screensize[0] - 100)
+        self.coord_y = randint(50, screensize[1] - 50)
 
     def move_target(self):
         """
