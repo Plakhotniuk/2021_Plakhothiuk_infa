@@ -1,13 +1,12 @@
 from Balls import *
-import math
 
 
 class Gun:
     """
     Class of Cannon
     """
-    def __init__(self, x=400, y=700, color=BLACK, length=70, angle=0,
-                 shooting_mode=False, power=0, activation=False):
+    def __init__(self, x=40, y=700, color=BLACK, length=70, angle=0,
+                 shooting_mode=False, power=0, activation=False, number=1):
         """
         :param x: coordinate x
         :param y: coordinate y
@@ -15,7 +14,8 @@ class Gun:
         :param length: gun barrel length
         :param angle: angle with the horizon
         :param shooting_mode:
-        :param power:
+        :param power: power of shot
+        :param number: number of tank
         """
         self.x = x
         self.y = y
@@ -33,12 +33,24 @@ class Gun:
         self.size = 50
         self.health = 500
         self.is_alive = True
+        self.number = number
 
     def fire2_start(self):
         """
         Starts shooting mode
         """
         self.shooting_mode = True
+
+    def print_health(self, position):
+        """
+        Prints health of tank
+        :param position: set position
+        """
+        if self.health <= 0:
+            self.health = 0
+        new_gun_health_myfont = pygame.font.SysFont('Times New Roman', 30)
+        scoretext = new_gun_health_myfont.render((str(self.number) + ") Health: " + str(self.health)), True, BLACK)
+        screen.blit(scoretext, position)
 
     def motion(self):
         """
@@ -88,8 +100,8 @@ class Gun:
         """
         Draws Gun
         """
-        pygame.draw.rect(screen, self.body_color, (self.x - 45, self.y - 25, 90, self.size))
-        pygame.draw.rect(screen, BLACK, (self.x - 45, self.y - 25, 90, self.size), width=2)
+        pygame.draw.rect(screen, self.body_color, (self.x - 45, self.y, 90, self.size - 10))
+        pygame.draw.rect(screen, BLACK, (self.x - 45, self.y, 90, self.size - 10), width=2)
         pygame.draw.line(screen, self.color, (self.x, self.y),
                          (self.x + self.length * math.cos(self.angle),
                           self.y - self.length * math.sin(self.angle)), width=7)
@@ -122,8 +134,13 @@ class Gun:
             self.draw_gun()
 
     def hit_tank(self, obj):
+        """
+        Checking of tank hitting
+        :param obj: Sells, bombs
+        """
         if (self.x - obj.coord_x) ** 2 + (self.y - obj.coord_y) ** 2 <= (self.size + obj.radius) ** 2:
             self.health -= 20
+            obj.is_alive = False
             if self.health <= 0:
                 self.is_alive = False
 
@@ -135,6 +152,5 @@ class Gun:
             if self.power < 100:
                 self.power += 0.5
             self.color = RED
-
         else:
             self.color = BLACK

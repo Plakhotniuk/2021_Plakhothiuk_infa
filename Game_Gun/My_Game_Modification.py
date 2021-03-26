@@ -2,21 +2,31 @@ from Gun import *
 
 
 class Player:
+    """
+    Player with some parameters
+    """
 
-    def __init__(self, username='', score=0, shots=0):
+    def __init__(self, score=0, shots=0):
         """
         Some information about player (Score, Username, number of shots)
-        :param username:
         :param score:
         :param shots:
         """
         self.score = score
-        self.username = username
         self.shots = shots
 
 
-# class Amo(Ball):
-#
+def clear_massive(mapa):
+    """
+    Delete element of massive
+    :param mapa:
+    """
+    if mapa['remove ind'] == -1:
+        pass
+    else:
+        mapa['massive'].remove(mapa['massive'][mapa['remove ind']])
+    mapa['remove ind'] = -1
+
 
 def generate_targets(number_of_targets):
     """
@@ -24,7 +34,7 @@ def generate_targets(number_of_targets):
     :param number_of_targets:set number of targets
     """
     for i in range(number_of_targets):
-        targets_mass['massive'].append(BallTarget())
+        targets_mass['massive'].append(BallTarget(velocity_x=randint(-10, 10), target_type=randint(1, 2)))
 
 
 finished = False
@@ -33,16 +43,19 @@ finished = False
 def game():
     """
     Game session process
+    Move tanks using WASD
+    You can switch to another Tank using M
     """
-    global finished, see_results
+    global finished
+    finished = False
     generate_targets(5)
     counter = 0
-    new_gun = Gun(activation=True)
-    another_new_gun = Gun(x=40, y=50)
+    new_gun = Gun(activation=True, number=1)
+    another_new_gun = Gun(x=880, y=700, number=2)
     finished_session = False
-    see_results = False
     new_player = Player()
     element_mass['massive'].clear()
+    see_results = False
 
     while not finished_session:
 
@@ -88,21 +101,24 @@ def game():
                     if not see_results:
                         new_player.shots += 1
 
-        new_gun.draw_gun()
-        another_new_gun.draw_gun()
+        new_gun.print_health(position=(screensize[0] // 8, 80))
+        another_new_gun.print_health(position=(screensize[0] // 8, 120))
 
-        if new_gun.activation:
+        if new_gun.is_alive:
+            new_gun.draw_gun()
+        if another_new_gun.is_alive:
+            another_new_gun.draw_gun()
+
+        if new_gun.activation and new_gun.is_alive:
             new_gun.motion()
             new_gun.targeting()
             new_gun.power_up()
-        if another_new_gun.activation:
+
+        if another_new_gun.activation and another_new_gun.is_alive:
             another_new_gun.motion()
             another_new_gun.targeting()
             another_new_gun.power_up()
 
-        targets_mass['remove ind'] = -1
-        element_mass['remove ind'] = -1
-        bombs_massive['remove ind'] = -1
         for i in range(len(targets_mass['massive'])):
             targets_mass['massive'][i].move_target()
             if targets_mass['massive'][i].attack:
@@ -120,6 +136,8 @@ def game():
 
         for j in range(len(element_mass['massive'])):
             element_mass['massive'][j].move_ball()
+            new_gun.hit_tank(element_mass['massive'][j])
+            another_new_gun.hit_tank(element_mass['massive'][j])
             if len(bombs_massive['massive']) > j:
                 new_gun.hit_tank(bombs_massive['massive'][j])
                 another_new_gun.hit_tank(bombs_massive['massive'][j])
@@ -132,22 +150,10 @@ def game():
                     targets_mass['remove ind'] = i
                 targets_mass['massive'][i].hit_enemy(element_mass['massive'][j], new_player)
 
-        if targets_mass['remove ind'] == -1:
-            pass
-        else:
-            targets_mass['massive'].remove(targets_mass['massive'][targets_mass['remove ind']])
+        clear_massive(targets_mass)
+        clear_massive(element_mass)
+        clear_massive(bombs_massive)
 
-        if element_mass['remove ind'] == -1:
-            pass
-        else:
-            element_mass['massive'].remove(element_mass['massive'][element_mass['remove ind']])
-
-        if bombs_massive['remove ind'] == -1:
-            pass
-        else:
-            bombs_massive['massive'].remove(bombs_massive['massive'][bombs_massive['remove ind']])
-
-        print(new_gun.health)
         if not targets_mass['massive']:
             see_results = True
 

@@ -1,6 +1,6 @@
 from random import randint
 import pygame
-
+import math
 pygame.init()
 
 FPS = 70
@@ -32,7 +32,7 @@ bombs_massive = {'massive': [], 'remove ind': -1}
 
 class Ball:
     """
-    Class of balls (Shells)
+    Class of balls
     """
     def __init__(self, radius=randint(30, 50), coord_x=0, coord_y=0,
                  velocity_x=int(randint(0, 10)), velocity_y=int(randint(0, 10)),
@@ -84,7 +84,7 @@ class BallTarget(Ball):
     """
     Class of Targets, inheritance from Balls
     """
-    def __init__(self, health=30, is_alive=True):
+    def __init__(self, health=30, is_alive=True, velocity_x=0, target_type=1):
         """
         Generates new Target
         :param health: health points
@@ -97,22 +97,39 @@ class BallTarget(Ball):
         self.attack = False
         self.coord_x = randint(100, screensize[0] - 100)
         self.coord_y = randint(50, screensize[1] - 50)
+        self.velocity_x = velocity_x
+        self.target_type = target_type
 
     def move_target(self):
         """
         Moves targets
         """
-        self.coord_x += self.velocity_x
+        if self.target_type == 1:
+            self.coord_x += self.velocity_x
+        if self.target_type == 2:
+            self.coord_x += self.velocity_x
+            self.velocity_y = math.cos(self.coord_x) * 10
+            self.coord_y -= self.velocity_y
         if self.coord_x >= screensize[0] - self.radius or self.coord_x <= self.radius:
             self.velocity_x *= -1
-
         if self.coord_y >= screensize[1] - self.radius or self.coord_y <= self.radius:
             self.velocity_y *= -1
         if self.time_attack == 0:
             self.attack = True
             self.time_attack = 300
         self.time_attack -= 1
-        self.draw_ball()
+        if self.target_type == 1:
+            self.draw_ball()
+        if self.target_type == 2:
+            self.draw_rect()
+
+    def draw_rect(self):
+        """
+        Draws triangle target
+        :return:
+        """
+        pygame.draw.polygon(screen, self.color, ((self.coord_x + self.radius//2, self.coord_y),
+                            (self.coord_x - self.radius//2, self.coord_y), (self.coord_x, self.coord_y - self.radius)))
 
     def hit_enemy(self, obj, player):
         """
