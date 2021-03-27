@@ -82,7 +82,7 @@ class Gun:
         Происходит при отпускании кнопки мыши.
         Начальные значения компонент скорости мяча vx и vy зависят от положения мыши.
         """
-        new_ball = Ball()
+        new_ball = Ball(color=COLORS[randint(0, 5)])
         new_ball.radius = 15
 
         new_ball.velocity_x = self.power * math.cos(self.angle) * 0.5

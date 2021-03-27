@@ -23,7 +23,7 @@ CYAN = (0, 255, 255)
 BLACK = (0, 0, 0)
 COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
 
-element_mass = {'massive': [], 'remove ind': -1}
+element_mass = {'massive': [], 'remove ind': -1}  # Massive of balls
 
 targets_mass = {'massive': [], 'remove ind': -1}
 
@@ -41,7 +41,7 @@ class Ball:
         Generates random parameters of Ball (color, coord, velocity)
         Default parameters: gravitation, health, is_alive
         """
-        self.color = COLORS[randint(0, 5)]
+        self.color = color
         self.radius = radius
         self.coord_x = coord_x
         self.coord_y = coord_y
@@ -90,7 +90,7 @@ class BallTarget(Ball):
         :param health: health points
         :param is_alive: Default (True)
         """
-        super().__init__()
+        super().__init__(color=COLORS[randint(0, 5)])
         self.health = health
         self.is_alive = is_alive
         self.time_attack = randint(1, 1000)
