@@ -16,6 +16,8 @@ class Gun:
         :param shooting_mode:
         :param power: power of shot
         :param number: number of tank
+
+
         """
         self.x = x
         self.y = y
@@ -78,23 +80,26 @@ class Gun:
                 self.y -= self.velocity_y
 
     def fire2_end(self):
-        """Выстрел мячом.
-        Происходит при отпускании кнопки мыши.
-        Начальные значения компонент скорости мяча vx и vy зависят от положения мыши.
         """
-        new_ball = Ball(color=COLORS[randint(0, 5)])
-        new_ball.radius = 15
+        Ball shot.
+        Occurs when the mouse button is released.
+        The initial values of the vx and vy components
+        of the ball velocity depend on the position of the mouse.
+        """
+        if self.is_alive:
+            new_ball = Ball(color=COLORS[randint(0, 5)])
+            new_ball.radius = 15
 
-        new_ball.velocity_x = self.power * math.cos(self.angle) * 0.5
-        new_ball.velocity_y = self.power * math.sin(self.angle) * 0.5
-        new_ball.coord_x = self.x + self.length * math.cos(self.angle)
-        new_ball.coord_y = self.y - self.length * math.sin(self.angle)
+            new_ball.velocity_x = self.power * math.cos(self.angle) * 0.5
+            new_ball.velocity_y = self.power * math.sin(self.angle) * 0.5
+            new_ball.coord_x = self.x + self.length * math.cos(self.angle)
+            new_ball.coord_y = self.y - self.length * math.sin(self.angle)
 
-        element_mass['massive'].append(new_ball)
-        self.power = 0
-        self.length = 70
-        self.color = BLACK
-        self.shooting_mode = False
+            element_mass['massive'].append(new_ball)
+            self.power = 0
+            self.length = 70
+            self.color = BLACK
+            self.shooting_mode = False
 
     def draw_gun(self):
         """
@@ -135,8 +140,8 @@ class Gun:
 
     def hit_tank(self, obj):
         """
-        Checking of tank hitting
-        :param obj: Sells, bombs
+        Tank hit check
+        :param obj: Sells or bombs
         """
         if (self.x - obj.coord_x) ** 2 + (self.y - obj.coord_y) ** 2 <= (self.size + obj.radius) ** 2:
             self.health -= 20

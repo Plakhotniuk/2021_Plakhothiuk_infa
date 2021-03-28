@@ -10,7 +10,7 @@ class Player:
         """
         Some information about player (Score, Username, number of shots)
         :param score:
-        :param shots:
+        :param shots: number of shots
         """
         self.score = score
         self.shots = shots
@@ -19,7 +19,8 @@ class Player:
 def clear_massive(mapa):
     """
     Delete element of massive
-    :param mapa:
+    :param mapa: map that contains number of elements that should be deleted after updating of screen
+                    and massive of elements
     """
     if mapa['remove ind'] == -1:
         pass
@@ -48,7 +49,7 @@ def game():
     """
     global finished
     finished = False
-    generate_targets(5)
+    generate_targets(10)
     counter = 0
     new_gun = Gun(activation=True, number=1)
     another_new_gun = Gun(x=880, y=700, number=2)
@@ -136,11 +137,16 @@ def game():
 
         for j in range(len(element_mass['massive'])):
             element_mass['massive'][j].move_ball()
-            new_gun.hit_tank(element_mass['massive'][j])
-            another_new_gun.hit_tank(element_mass['massive'][j])
+
+            if new_gun.is_alive:
+                new_gun.hit_tank(element_mass['massive'][j])
+            if another_new_gun.hit_tank(element_mass['massive'][j]):
+                another_new_gun.hit_tank(element_mass['massive'][j])
             if len(bombs_massive['massive']) > j:
-                new_gun.hit_tank(bombs_massive['massive'][j])
-                another_new_gun.hit_tank(bombs_massive['massive'][j])
+                if new_gun.is_alive:
+                    new_gun.hit_tank(bombs_massive['massive'][j])
+                if another_new_gun.is_alive:
+                    another_new_gun.hit_tank(bombs_massive['massive'][j])
 
         for i in range(len(targets_mass['massive'])):
             for j in range(len(element_mass['massive'])):
